@@ -59,7 +59,7 @@ var sha1hash *string = flag.String("sha1", "", "A sha1 hash to check against")
 var sha256hash *string = flag.String("sha256", "", "A sha256 hash to check against")
 var sha512hash *string = flag.String("sha512", "", "A sha512 hash to check against")
 
-func checkhashes(input io.Reader) (fails uint8) {
+func checkHashes(input io.Reader) (fails uint8) {
 	var md5writer hash.Hash = nil
 	if *md5hash != "" {
 		md5writer = md5.New()
@@ -107,4 +107,14 @@ func checkhashes(input io.Reader) (fails uint8) {
 		}
 	}
 	return
+}
+
+func printHashes(input io.Reader) {
+	md5writer := md5.New()
+	sha1writer := sha1.New()
+	sha256writer := sha256.New()
+	sha512writer := sha512.New()
+	hashwriter := NilSafeMultiWriter(md5writer, sha1writer, sha256writer, sha512writer)
+	io.Copy(hashwriter, input)
+	fmt.Printf("-md5 %x -sha1 %x -sha256 %x -sha512 %x\n", md5writer.Sum(nil), sha1writer.Sum(nil), sha256writer.Sum(nil), sha512writer.Sum(nil))
 }

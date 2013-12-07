@@ -25,6 +25,7 @@ import (
 
 func main() {
 	file := flag.String("file", "", "The file to check against")
+	printhashes := flag.Bool("printhashes", false, "Print out the hashes in the format for hashcheck instead of checking against them")
 	flag.Parse()
 	if *file == "" {
 		fmt.Fprintf(os.Stderr, "Missing the -file flag\n")
@@ -37,7 +38,9 @@ func main() {
 		os.Exit(1)
 	}
 	defer f.Close()
-	if checkhashes(f) > 0 {
+	if *printhashes {
+		printHashes(f)
+	} else if checkHashes(f) > 0 {
 		os.Exit(1)
 	}
 }
