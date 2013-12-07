@@ -17,5 +17,27 @@
 
 package main
 
+import (
+	"flag"
+	"fmt"
+	"os"
+)
+
 func main() {
+	file := flag.String("file", "", "The file to check against")
+	flag.Parse()
+	if *file == "" {
+		fmt.Fprintf(os.Stderr, "Missing the -file flag\n")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+	f, err := os.Open(*file)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+	defer f.Close()
+	if checkhashes(f) > 0 {
+		os.Exit(1)
+	}
 }
