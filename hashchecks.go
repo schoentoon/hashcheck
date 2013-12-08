@@ -56,7 +56,9 @@ func (t *nilSafeMultiWriter) Write(p []byte) (n int, err error) {
 
 var md5hash *string = flag.String("md5", "", "A md5 hash to check against")
 var sha1hash *string = flag.String("sha1", "", "A sha1 hash to check against")
+var sha224hash *string = flag.String("sha224", "", "A sha224 hash to check against")
 var sha256hash *string = flag.String("sha256", "", "A sha256 hash to check against")
+var sha384hash *string = flag.String("sha384", "", "A sha384 hash to check against")
 var sha512hash *string = flag.String("sha512", "", "A sha512 hash to check against")
 
 func checkHashes(input io.Reader) (fails uint8) {
@@ -68,15 +70,23 @@ func checkHashes(input io.Reader) (fails uint8) {
 	if *sha1hash != "" {
 		sha1writer = sha1.New()
 	}
+	var sha224writer hash.Hash = nil
+	if *sha224hash != "" {
+		sha224writer = sha256.New224()
+	}
 	var sha256writer hash.Hash = nil
 	if *sha256hash != "" {
 		sha256writer = sha256.New()
+	}
+	var sha384writer hash.Hash = nil
+	if *sha384hash != "" {
+		sha384writer = sha512.New384()
 	}
 	var sha512writer hash.Hash = nil
 	if *sha512hash != "" {
 		sha512writer = sha512.New()
 	}
-	hashwriter := NilSafeMultiWriter(md5writer, sha1writer, sha256writer, sha512writer)
+	hashwriter := NilSafeMultiWriter(md5writer, sha1writer, sha224writer, sha256writer, sha384writer, sha512writer)
 	io.Copy(hashwriter, input)
 	if md5writer != nil {
 		md5output := hex.EncodeToString(md5writer.Sum(nil))
@@ -92,10 +102,24 @@ func checkHashes(input io.Reader) (fails uint8) {
 			fails++
 		}
 	}
+	if sha224writer != nil {
+		sha224output := hex.EncodeToString(sha224writer.Sum(nil))
+		if sha224output != *sha224hash {
+			fmt.Printf("sha224 mismatch, expected: %s, got: %s\n", *sha224hash, sha224output)
+			fails++
+		}
+	}
 	if sha256writer != nil {
 		sha256output := hex.EncodeToString(sha256writer.Sum(nil))
 		if sha256output != *sha256hash {
 			fmt.Printf("sha256 mismatch, expected: %s, got: %s\n", *sha256hash, sha256output)
+			fails++
+		}
+	}
+	if sha384writer != nil {
+		sha384output := hex.EncodeToString(sha384writer.Sum(nil))
+		if sha384output != *sha384hash {
+			fmt.Printf("sha384 mismatch, expected: %s, got: %s\n", *sha384hash, sha384output)
 			fails++
 		}
 	}
