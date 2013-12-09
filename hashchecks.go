@@ -136,9 +136,11 @@ func checkHashes(input io.Reader) (fails uint8) {
 func printHashes(input io.Reader) {
 	md5writer := md5.New()
 	sha1writer := sha1.New()
+	sha224writer := sha256.New224()
 	sha256writer := sha256.New()
+	sha384writer := sha512.New384()
 	sha512writer := sha512.New()
-	hashwriter := NilSafeMultiWriter(md5writer, sha1writer, sha256writer, sha512writer)
+	hashwriter := NilSafeMultiWriter(md5writer, sha1writer, sha224writer, sha256writer, sha384writer, sha512writer)
 	io.Copy(hashwriter, input)
-	fmt.Printf("-md5 %x -sha1 %x -sha256 %x -sha512 %x\n", md5writer.Sum(nil), sha1writer.Sum(nil), sha256writer.Sum(nil), sha512writer.Sum(nil))
+	fmt.Printf("-md5 %x -sha1 %x -sha224 %x -sha256 %x -sha384 %x -sha512 %x\n", md5writer.Sum(nil), sha1writer.Sum(nil), sha224writer.Sum(nil), sha256writer.Sum(nil), sha384writer.Sum(nil), sha512writer.Sum(nil))
 }
